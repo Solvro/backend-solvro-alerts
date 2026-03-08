@@ -19,6 +19,7 @@
 
    ```bash
    pip install -r requirements.txt
+   pip install -r requirements-dev.txt
    ```
 
 4. **Skopiuj plik środowiskowy**
