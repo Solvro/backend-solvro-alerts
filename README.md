@@ -1,3 +1,50 @@
+### Instalacja
+
+1. **Sklonuj repozytorium**
+
+   ```bash
+   git clone https://github.com/Solvro/backend-testownik.git
+   cd backend-testownik
+   ```
+
+2. **Utwórz i aktywuj środowisko wirtualne**
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate        # Linux / macOS
+   .venv\Scripts\activate           # Windows
+   ```
+
+3. **Zainstaluj zależności**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Skopiuj plik środowiskowy**
+
+   ```
+   cp .env.example .env
+   ```
+
+5. **Wykonaj migracje bazy danych**
+
+   ```bash
+   python manage.py migrate
+   ```
+
+6. **(Opcjonalnie) Stwórz konto administratora**
+
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+7. **Uruchom serwer deweloperski**
+
+   ```bash
+   python manage.py runserver
+   ```
+
 ## 🤝 Kontrybucja
 
 Chcesz pomóc w rozwoju Testownika? Let's go!
