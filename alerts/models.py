@@ -27,3 +27,5 @@ class Alert(models.Model):
 
     is_global = models.BooleanField()
     is_active = models.BooleanField()
+
+    applications = models.ManyToManyField()
