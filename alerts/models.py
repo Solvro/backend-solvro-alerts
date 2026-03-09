@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from applications.models import Application
 
 
 class AlertType(models.TextChoices):
@@ -28,4 +29,4 @@ class Alert(models.Model):
     is_global = models.BooleanField()
     is_active = models.BooleanField()
 
-    applications = models.ManyToManyField()
+    applications = models.ManyToManyField(Application, related_name="alerts")
