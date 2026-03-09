@@ -9,13 +9,13 @@ class IsAPIKeyAuthenticated(permissions.BasePermission):
     """
 
     message = "Invalid or missing API key"
-    
+
     def has_permission(self, request, view):
         plain_text_api_key = request.META.get("HTTP_X_API_KEY")
 
         if not plain_text_api_key:
             return False
-        
+
         hashed_api_key = hash_string(plain_text_api_key)
 
         # find an application by its hashed api key
@@ -23,7 +23,6 @@ class IsAPIKeyAuthenticated(permissions.BasePermission):
 
         if not app:
             return False
-        
+
         # use safe verification
         return app.verify_api_key(plain_text_api_key)
-

@@ -13,11 +13,12 @@ class Application(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    api_key = models.CharField(max_length=255, unique=True) # hashed api key is stored in db
+    api_key = models.CharField(
+        max_length=255, unique=True
+    )  # hashed api key is stored in db
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     def generate_api_key(self):
         """
@@ -31,10 +32,9 @@ class Application(models.Model):
         # api key is assigned a hash value
         self.api_key = hashing.hash_string(plain_text_key)
 
-        return plain_text_key   
-    
-    
-    def verify_api_key(self, plain_text_key:str):
+        return plain_text_key
+
+    def verify_api_key(self, plain_text_key: str):
         """
         Verifies if provided plain text key matches stored hash.
         """
@@ -45,7 +45,5 @@ class Application(models.Model):
         # 'compare_digest' prevents from timing attacks
         return secrets.compare_digest(self.api_key, key_hash)
 
-
     def __str__(self):
         return f"Application(name = '{self.name}')"
-
