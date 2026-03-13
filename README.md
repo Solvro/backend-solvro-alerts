@@ -3,7 +3,7 @@
 1. **Sklonuj repozytorium**
 
    ```bash
-   git clone https://github.com/Solvro/backend-testownik.git
+   git clone https://github.com/Solvro/backend-solvro-alerts
    cd backend-testownik
    ```
 
