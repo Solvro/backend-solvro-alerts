@@ -4,12 +4,12 @@ from .models import Alert
 
 @admin.register(Alert)
 class AlertAdmin(admin.ModelAdmin):
-    # To, co będzie widać na liście wszystkich alertów
+    # Columns displayed in the list view of the admin panel
     list_display = ("title", "alert_type", "is_active", "is_global", "start_at")
 
     list_filter = ("is_active", "is_global", "alert_type")
 
     search_fields = ("title", "content")
 
-    # Pozwala przypisywać aplikacje przez interfejs
+    # UI widget for managing ManyToMany relationships
     filter_horizontal = ("applications",)

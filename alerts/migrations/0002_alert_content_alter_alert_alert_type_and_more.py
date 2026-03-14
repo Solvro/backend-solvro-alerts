@@ -4,45 +4,52 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('alerts', '0001_initial'),
+        ("alerts", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='alert',
-            name='content',
-            field=models.TextField(default=''),
+            model_name="alert",
+            name="content",
+            field=models.TextField(default=""),
         ),
         migrations.AlterField(
-            model_name='alert',
-            name='alert_type',
-            field=models.CharField(choices=[('info', 'Info'), ('warning', 'Warning'), ('critical', 'Critical')], default='info', max_length=20),
+            model_name="alert",
+            name="alert_type",
+            field=models.CharField(
+                choices=[
+                    ("info", "Info"),
+                    ("warning", "Warning"),
+                    ("critical", "Critical"),
+                ],
+                default="info",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='alert',
-            name='end_at',
+            model_name="alert",
+            name="end_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='alert',
-            name='is_active',
+            model_name="alert",
+            name="is_active",
             field=models.BooleanField(default=True),
         ),
         migrations.AlterField(
-            model_name='alert',
-            name='is_global',
+            model_name="alert",
+            name="is_global",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='alert',
-            name='start_at',
+            model_name="alert",
+            name="start_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='alert',
-            name='title',
+            model_name="alert",
+            name="title",
             field=models.CharField(blank=True, max_length=255),
         ),
     ]
