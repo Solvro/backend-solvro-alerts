@@ -18,15 +18,17 @@ class Alert(models.Model):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=255)
-    alert_type = models.TextField(
+    title = models.CharField(max_length=255, blank=True)
+    content = models.TextField(default="")
+
+    alert_type = models.CharField(
         max_length=20, choices=AlertType.choices, default=AlertType.INFO
     )
 
-    start_at = models.DateTimeField()
-    end_at = models.DateTimeField()
+    start_at = models.DateTimeField(null=True, blank=True)
+    end_at = models.DateTimeField(null=True, blank=True)
 
-    is_global = models.BooleanField()
-    is_active = models.BooleanField()
+    is_global = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     applications = models.ManyToManyField(Application, related_name="alerts")
