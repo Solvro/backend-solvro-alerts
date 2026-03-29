@@ -36,6 +36,6 @@ urlpatterns = [
     path(
         "swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"
     ),
-    path('auth/login/', solvro_login, name='solvro_login'),
-    path('auth/callback/', solvro_callback, name='solvro_callback'),
+    path("auth/login/", solvro_login, name="solvro_login"),
+    path("auth/callback/", solvro_callback, name="solvro_callback"),
 ]
