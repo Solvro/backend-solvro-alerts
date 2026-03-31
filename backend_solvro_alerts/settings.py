@@ -165,6 +165,6 @@ OAUTH2_PROVIDER = {
 SOLVRO_AUTH = {
     "KEYCLOAK_URL": os.getenv("SOLVRO_KEYCLOAK_URL", "https://auth.solvro.pl"),
     "REALM": os.getenv("SOLVRO_REALM", "solvro"),
-    "CLIENT_ID": os.getenv("SOLVRO_CLIENT_ID"),
-    "CLIENT_SECRET": os.getenv("SOLVRO_CLIENT_SECRET"),
+    "CLIENT_ID": os.getenv("SOLVRO_AUTH_CLIENT_ID"),
+    "CLIENT_SECRET": os.getenv("SOLVRO_AUTH_CLIENT_SECRET"),
 }

@@ -20,7 +20,7 @@ from django.urls import path, include
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from applications.views import solvro_login, solvro_callback
+from backend_solvro_alerts.views import solvro_login, solvro_callback
 
 
 @extend_schema(exclude=True)
