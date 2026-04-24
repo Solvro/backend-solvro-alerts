@@ -73,5 +73,8 @@ def solvro_callback(request):
         },
     )
 
-    login(request, user)
-    return redirect("/dashboard/")
+    login(
+        request, user, backend="django.contrib.auth.backends.ModelBackend"
+    )  # somehow this works
+
+    return redirect("/admin")
