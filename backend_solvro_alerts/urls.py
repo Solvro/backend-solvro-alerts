@@ -20,6 +20,8 @@ from django.urls import path, include
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from backend_solvro_alerts.views import solvro_login, solvro_callback
+
 
 @extend_schema(exclude=True)
 class HiddenSpectacularAPIView(SpectacularAPIView):
@@ -34,4 +36,6 @@ urlpatterns = [
     path(
         "swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"
     ),
+    path("auth/login/", solvro_login, name="solvro_login"),
+    path("auth/callback/", solvro_callback, name="solvro_callback"),
 ]

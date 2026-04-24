@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "applications",
     "alerts",
+    "oauth2_provider",
 ]
 
 MIDDLEWARE = [
@@ -73,6 +74,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "oauth2_provider.middleware.OAuth2TokenMiddleware",
+]
+
+AUTHENTICATION_BACKENDS = [
+    "oauth2_provider.backends.OAuth2Backend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 ROOT_URLCONF = "backend_solvro_alerts.urls"
@@ -145,3 +152,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+OAUTH2_PROVIDER = {
+    "SCOPES": {
+        "read": "Read scope",
+        "write": "Write scope",
+    },
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 3600 * 24 * 7,
+}
+# Solvro Auth settings
+SOLVRO_AUTH = {
+    "KEYCLOAK_URL": os.getenv("SOLVRO_KEYCLOAK_URL", "https://auth.solvro.pl"),
+    "REALM": os.getenv("SOLVRO_REALM", "solvro"),
+    "CLIENT_ID": os.getenv("SOLVRO_AUTH_CLIENT_ID"),
+    "CLIENT_SECRET": os.getenv("SOLVRO_AUTH_CLIENT_SECRET"),
+}
