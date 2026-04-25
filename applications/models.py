@@ -16,6 +16,7 @@ class Application(models.Model):
     api_key = models.CharField(
         max_length=255, unique=True
     )  # hashed api key is stored in db
+    is_revoked = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -31,6 +32,8 @@ class Application(models.Model):
 
         # api key is assigned a hash value
         self.api_key = hashing.hash_string(plain_text_key)
+
+        self.is_revoked = False
 
         return plain_text_key
 

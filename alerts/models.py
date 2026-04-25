@@ -31,4 +31,6 @@ class Alert(models.Model):
     is_global = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    applications = models.ManyToManyField(Application, related_name="alerts")
+    applications = models.ManyToManyField(
+        Application, related_name="alerts", blank=True
+    )
