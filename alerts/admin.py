@@ -47,6 +47,7 @@ class AlertAdmin(ModelAdmin):
                     "content",
                     "alert_type",
                     "link",
+                    "open_in_new_tab",
                     "is_dismissable",
                 )
             },

@@ -10,18 +10,29 @@ from applications.models import Application
 ALERT_HTML_TAGS = {
     "a",
     "b",
+    "blockquote",
     "br",
+    "code",
+    "del",
     "div",
     "em",
+    "h1",
     "h2",
     "h3",
     "h4",
+    "h5",
+    "h6",
+    "hr",
     "i",
     "li",
     "ol",
     "p",
+    "pre",
+    "s",
     "span",
     "strong",
+    "sub",
+    "sup",
     "u",
     "ul",
 }
@@ -62,6 +73,13 @@ class Alert(models.Model):
         help_text=(
             "Optional URL. When set, frontends should make the entire alert "
             "banner clickable and navigate here on click."
+        ),
+    )
+    open_in_new_tab = models.BooleanField(
+        default=True,
+        help_text=(
+            "If true, frontends should open the link in a new tab "
+            '(target="_blank" rel="noopener"). Ignored when link is empty.'
         ),
     )
 

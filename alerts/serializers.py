@@ -12,6 +12,7 @@ class AlertSerializer(serializers.ModelSerializer):
             "content",
             "alert_type",
             "link",
+            "open_in_new_tab",
             "is_global",
             "is_dismissable",
             "start_at",

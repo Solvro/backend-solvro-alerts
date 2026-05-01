@@ -141,7 +141,9 @@ export interface Alert {
   id: string;
   title: string;
   content: string;
+  alert_type: AlertType;
   link: string;
+  open_in_new_tab: boolean;
   is_global: boolean;
   is_dismissable: boolean;
   start_at: string | null;
@@ -166,6 +168,7 @@ export interface Alert {
           <tr><td class="py-2 pr-4 font-mono text-xs">content</td><td class="py-2 pr-4 font-mono text-xs">string (HTML)</td><td class="py-2 text-slate-600 dark:text-slate-300">HTML content of alert.</td></tr>
           <tr><td class="py-2 pr-4 font-mono text-xs">alert_type</td><td class="py-2 pr-4 font-mono text-xs">"info" | "warning" | "critical"</td><td class="py-2 text-slate-600 dark:text-slate-300">Style your banner accordingly.</td></tr>
           <tr><td class="py-2 pr-4 font-mono text-xs">link</td><td class="py-2 pr-4 font-mono text-xs">string (URL)</td><td class="py-2 text-slate-600 dark:text-slate-300">Empty string when unset. If non-empty, make the entire banner clickable.</td></tr>
+          <tr><td class="py-2 pr-4 font-mono text-xs">open_in_new_tab</td><td class="py-2 pr-4 font-mono text-xs">bool</td><td class="py-2 text-slate-600 dark:text-slate-300">When true and <code class="rounded bg-slate-100 px-1 dark:bg-slate-800">link</code> is set, open it in a new tab (<code class="rounded bg-slate-100 px-1 dark:bg-slate-800">target="_blank" rel="noopener"</code>). Ignored when link is empty.</td></tr>
           <tr><td class="py-2 pr-4 font-mono text-xs">is_global</td><td class="py-2 pr-4 font-mono text-xs">bool</td><td class="py-2 text-slate-600 dark:text-slate-300">True if the alert was published for all apps.</td></tr>
           <tr><td class="py-2 pr-4 font-mono text-xs">is_dismissable</td><td class="py-2 pr-4 font-mono text-xs">bool</td><td class="py-2 text-slate-600 dark:text-slate-300">When false, render the banner without a close button.</td></tr>
           <tr><td class="py-2 pr-4 font-mono text-xs">start_at, end_at</td><td class="py-2 pr-4 font-mono text-xs">datetime | null</td><td class="py-2 text-slate-600 dark:text-slate-300">Active window. The server already filters by these; included for client display.</td></tr>
@@ -178,7 +181,8 @@ export interface Alert {
     <h2 class="text-base font-semibold">Notes for frontend authors</h2>
     <ul class="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-700 dark:text-slate-300">
       <li>Style the banner by <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">alert_type</code>: <span class="rounded bg-sky-100 px-1.5 py-0.5 text-sky-800 dark:bg-sky-900 dark:text-sky-200">info</span>, <span class="rounded bg-amber-100 px-1.5 py-0.5 text-amber-800 dark:bg-amber-900 dark:text-amber-200">warning</span>, <span class="rounded bg-red-100 px-1.5 py-0.5 text-red-800 dark:bg-red-900 dark:text-red-200">critical</span>.</li>
-      <li>If <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">link</code> is set, make the entire banner clickable and navigate there on click. Use <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">target="_blank" rel="noopener"</code> for external URLs.</li>
+      <li>If <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">link</code> is set, make the entire banner clickable. Honour <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">open_in_new_tab</code>: when true use <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">target="_blank" rel="noopener"</code>, otherwise navigate in the same tab (use the app router for internal links).</li>
+      <li>If you're on Tailwind, install <a href="https://github.com/tailwindlabs/tailwindcss-typography" class="font-medium text-brand-600 hover:underline">@tailwindcss/typography</a> and wrap the rendered <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">content</code> in <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">&lt;div class="prose prose-sm max-w-none dark:prose-invert"&gt;</code> — gives you sane defaults for headings, lists, blockquotes, links, etc. without authoring a custom stylesheet.</li>
       <li>Allow users to dismiss alerts client-side using the <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">id</code>; only show a close button when <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">is_dismissable</code> is true. The server doesn't track per-user state.</li>
       <li>The <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">content</code> field is sanitised server-side (nh3 / Ammonia), but defence-in-depth: run it through <a href="https://github.com/cure53/DOMPurify" class="font-medium text-brand-600 hover:underline">DOMPurify</a> or smth else on the client before injecting it into the DOM.
       <li>Calls with an unknown <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">?app=</code> code respond <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">400 Bad Request</code>; check the spelling of your app's slug.</li>
@@ -216,6 +220,7 @@ RESPONSE (array; render in order)
     content: string;             // HTML — sanitise + render via the platform's HTML renderer
     alert_type: "info" | "warning" | "critical";
     link: string;                // empty string when unset
+    open_in_new_tab: boolean;    // when link is set, true => target=_blank rel=noopener
     is_global: boolean;
     is_dismissable: boolean;
     start_at: string | null;     // ISO-8601; server already filters by window
@@ -232,9 +237,9 @@ UI RULES
   - Render `content` as HTML, but DEFENCE-IN-DEPTH: pass it through a sanitiser before
     handing it to the platform's HTML renderer. The server already strips scripts/img/etc.
     with nh3, but a second client-side pass protects against future regressions and
-    CDN/cache tampering. Allow only these inline tags:
-      a, b, em, i, strong, u, p, br, ul, ol, li, h2, h3, h4
-    and attributes: href, title, target, rel.
+    CDN/cache tampering. Allow only these tags:
+      {{ alert_html_tags }}
+    and attributes: href, title, target on &lt;a&gt;.
     Sanitiser per platform:
       web              -> DOMPurify
       Node SSR         -> sanitize-html (or DOMPurify with jsdom)
@@ -243,8 +248,16 @@ UI RULES
       iOS native       -> NSAttributedString from a sanitised string (drop &lt;script&gt;, etc.)
       Android native   -> Html.fromHtml on a pre-stripped string (Jsoup safelist)
     Never `eval`, never inject inline scripts.
-  - If `link` is non-empty, make the whole banner tappable/clickable and open it. Use:
-      web              -> &lt;a href&gt; or router navigation; target="_blank" for external
+  - STYLING the rendered HTML:
+    - If the project uses Tailwind: install @tailwindcss/typography and wrap the rendered
+      content in &lt;div class="prose prose-sm max-w-none dark:prose-invert"&gt; — gives sane
+      defaults for headings, lists, blockquotes, code, links. No custom CSS needed.
+    - Otherwise: ship a tiny scoped stylesheet for the banner that sets sensible defaults
+      for h1-h6, ul/ol, blockquote, pre/code, a (underline + colour). Keep it scoped to
+      the banner so it doesn't bleed into the host app.
+  - If `link` is non-empty, make the whole banner tappable/clickable and open it.
+    Platform link-openers:
+      web              -> &lt;a href&gt; or router navigation, honour `open_in_new_tab`
       React Native     -> Linking.openURL
       Flutter          -> url_launcher
       iOS / Android    -> the system URL opener (UIApplication.open / Intent.ACTION_VIEW)
@@ -266,8 +279,8 @@ DELIVERABLE
        on mount is fine);
     2. read/write the dismissal set with the platform's persistent storage;
     3. sanitise `content` with the platform sanitiser;
-    4. render the banner stack, applying color/icon by alert_type and the click/dismiss
-       behavior above.
+    4. render the banner stack, applying color/icon by alert_type, the typography styling
+       above (Tailwind prose if available), and the click/dismiss behavior.
   Mount it once near the root layout. Expose only one prop if any (override APP_CODE) —
   consumers should not have to wire a fetcher, a query client, or a sanitiser themselves.
   Read APP_CODE from the project's env config (.env / app config / Info.plist /
@@ -277,7 +290,8 @@ DELIVERABLE
 ACCEPTANCE
   - Mounting `<Alerts />` once is enough; no extra wiring required at call sites.
   - When the API returns alerts, banners render in order with correct color/icon.
-  - Tapping a banner with a `link` navigates correctly; without a `link`, it does nothing.
+  - Tapping a banner with a `link` navigates correctly and respects `open_in_new_tab`;
+    without a `link`, the banner is non-interactive (no hover affordance, no tap target).
   - Dismissed alerts stay hidden across app launches but reappear when the admin
     publishes a new alert with a different id.
   - Expired / inactive alerts never appear (server already filters; do not re-filter
