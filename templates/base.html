@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Solvro Alerts{% endblock %}</title>
+    {% load static %}
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/logo_solvro_mono.svg' %}">
+    <script>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        const dark = stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+      @custom-variant dark (&:where(.dark, .dark *));
+      @theme {
+        --color-brand-50:  #eef3ff;
+        --color-brand-100: #d9e3ff;
+        --color-brand-200: #b6c8ff;
+        --color-brand-300: #8aa6ff;
+        --color-brand-400: #5e82f8;
+        --color-brand-500: #408cff;
+        --color-brand-600: #2d6ae0;
+        --color-brand-700: #1f4cb0;
+        --color-brand-800: #1a3a85;
+        --color-brand-900: #152959;
+        --color-brand-950: #0d1936;
+      }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-full bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+    {% block topbar %}
+    <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+        <a href="/" class="flex items-center gap-3">
+          <img src="{% static 'img/solvro-wordmark-light.png' %}" alt="Solvro" class="h-8 w-auto dark:hidden" />
+          <img src="{% static 'img/solvro-wordmark-dark.png' %}" alt="Solvro" class="hidden h-8 w-auto dark:block" />
+          <span class="hidden text-sm font-medium text-slate-500 dark:text-slate-400 sm:inline">/ Alerts</span>
+        </a>
+        <nav class="flex items-center gap-2">
+          <button id="theme-toggle" type="button" aria-label="Toggle theme"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+            <svg class="h-4 w-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="hidden h-4 w-4 dark:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          {% block nav_extras %}{% endblock %}
+        </nav>
+      </div>
+    </header>
+    {% endblock %}
+
+    {% block body %}{% endblock %}
+
+    <script>
+      document.getElementById('theme-toggle')?.addEventListener('click', function () {
+        const dark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+      });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

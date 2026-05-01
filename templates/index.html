@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Solvro Alerts{% endblock %}
+
+{% block nav_extras %}
+  <a href="{% url 'scalar-ui' %}" class="hidden rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 sm:inline">API docs</a>
+  {% if request.user.is_authenticated %}
+    <a href="/admin/" class="rounded-md bg-brand-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-800">Admin</a>
+    <form method="post" action="{% url 'admin:logout' %}" class="inline">
+      {% csrf_token %}
+      <button type="submit" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Log out</button>
+    </form>
+  {% else %}
+    <a href="{% url 'admin:login' %}" class="rounded-md bg-brand-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-800">Sign in</a>
+    <a href="{% url 'admin_register' %}" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Register</a>
+  {% endif %}
+{% endblock %}
+
+{% block body %}
+<main class="mx-auto max-w-5xl px-6 py-12">
+  <section class="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+    <h1 class="text-3xl font-semibold tracking-tight">
+      Centralised alerts for every Solvro app
+    </h1>
+    <p class="mt-3 max-w-2xl text-slate-600 dark:text-slate-300">
+      Solvro Alerts is the single source of truth for banner-style messages
+      that the Solvro frontends (Testownik, Planer, Eventownik, …) display to
+      their users. Admins push messages here once; every frontend polls a
+      single read-only endpoint.
+    </p>
+    <div class="mt-6 flex flex-wrap gap-3">
+      {% if request.user.is_authenticated %}
+        <a href="/admin/" class="group inline-flex items-center gap-2 rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
+          Go to admin
+          <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+        </a>
+      {% else %}
+        <a href="{% url 'admin:login' %}" class="rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">Sign in</a>
+        <a href="{% url 'admin_register' %}" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Request an account</a>
+      {% endif %}
+      <a href="{% url 'scalar-ui' %}" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Open API docs</a>
+    </div>
+  </section>
+
+  <section class="mt-10 grid gap-6 md:grid-cols-2">
+    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+      <h2 class="text-base font-semibold">1. Get an admin account</h2>
+      <ol class="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-700 dark:text-slate-300">
+        <li>Click <strong>Sign in</strong> and choose <em>Continue with Solvro Auth</em>, or <strong>Register</strong> with your email + password.</li>
+        <li>Wait for an existing admin to approve your account.</li>
+        <li>Once approved, sign in and you'll land in the Django admin.</li>
+      </ol>
+    </div>
+    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+      <h2 class="text-base font-semibold">2. Register your application</h2>
+      <ol class="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-700 dark:text-slate-300">
+        <li>A superuser opens <strong>Applications &rarr; Add</strong> in the admin.</li>
+        <li>They set the human <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">name</code> (e.g. <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">Testownik</code>); the <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">code</code> is what your frontend will pass as <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">?app=</code>.</li>
+        <li>In the <em>Granted users</em> field they pick which staff members can manage alerts for that app.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="mt-10 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+    <h2 class="text-base font-semibold">3. Fetch alerts from your frontend</h2>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+      Call <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">GET /api/v1/alerts/?app=&lt;your-app-code&gt;</code>.
+      You'll receive every active alert that's either <strong>global</strong>
+      or <strong>targeted at your app</strong>. The endpoint is public — no
+      API key. An unknown <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">app</code> code returns
+      <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">400</code>.
+      Omit <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">?app=</code> to receive only global alerts.
+    </p>
+
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">curl</h3>
+        <div class="code-block mt-1 relative">
+<pre class="overflow-x-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>curl https://alerts.solvro.pl/api/v1/alerts/?app=testownik</code></pre>
+          <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">React + TanStack Query</h3>
+        <div class="code-block mt-1 relative">
+<pre class="overflow-x-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>import { useQuery } from "@tanstack/react-query";
+import type { Alert } from "./alerts";
+
+const APP_CODE = "testownik";
+
+export function useAlerts() {
+  return useQuery&lt;Alert[]&gt;({
+    queryKey: ["solvro-alerts", APP_CODE],
+    queryFn: async ({ signal }) =&gt; {
+      const r = await fetch(
+        `https://alerts.solvro.pl/api/v1/alerts/?app=${APP_CODE}`,
+        { signal },
+      );
+      if (!r.ok) throw new Error(`alerts fetch failed: ${r.status}`);
+      return r.json();
+    },
+    staleTime: 60_000,
+  });
+}</code></pre>
+          <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Example response</h3>
+      <div class="code-block mt-1 relative">
+<pre class="overflow-x-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>[
+  {
+    "id": "0a1c2e8e-9f30-4a4f-b4a3-7b1f3a1a2b9c",
+    "title": "Maintenance tonight",
+    "content": "&lt;p&gt;We're upgrading our server at 22:00.&lt;/p&gt;",
+    "alert_type": "info",
+    "link": "https://status.solvro.pl",
+    "is_global": true,
+    "is_dismissable": true,
+    "start_at": null,
+    "end_at": "2026-05-01T22:00:00Z"
+  }
+]</code></pre>
+        <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-10 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+    <h2 class="text-base font-semibold">Response schema</h2>
+
+    <div class="mt-4">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">TypeScript</h3>
+      <div class="code-block mt-1 relative">
+<pre class="overflow-x-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>export type AlertType = "info" | "warning" | "critical";
+
+export interface Alert {
+  id: string;
+  title: string;
+  content: string;
+  link: string;
+  is_global: boolean;
+  is_dismissable: boolean;
+  start_at: string | null;
+  end_at: string | null;
+}</code></pre>
+        <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
+      </div>
+    </div>
+
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full min-w-[640px] text-left text-sm">
+        <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-400">
+          <tr>
+            <th class="py-2 pr-4 font-medium">Field</th>
+            <th class="py-2 pr-4 font-medium">Type</th>
+            <th class="py-2 font-medium">Notes</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          <tr><td class="py-2 pr-4 font-mono text-xs">id</td><td class="py-2 pr-4 font-mono text-xs">uuid</td><td class="py-2 text-slate-600 dark:text-slate-300">Stable per alert; use for client-side dismissal memory.</td></tr>
+          <tr><td class="py-2 pr-4 font-mono text-xs">title</td><td class="py-2 pr-4 font-mono text-xs">string</td><td class="py-2 text-slate-600 dark:text-slate-300">May be empty.</td></tr>
+          <tr><td class="py-2 pr-4 font-mono text-xs">content</td><td class="py-2 pr-4 font-mono text-xs">string (HTML)</td><td class="py-2 text-slate-600 dark:text-slate-300">HTML content of alert.</td></tr>
+          <tr><td class="py-2 pr-4 font-mono text-xs">alert_type</td><td class="py-2 pr-4 font-mono text-xs">"info" | "warning" | "critical"</td><td class="py-2 text-slate-600 dark:text-slate-300">Style your banner accordingly.</td></tr>
+          <tr><td class="py-2 pr-4 font-mono text-xs">link</td><td class="py-2 pr-4 font-mono text-xs">string (URL)</td><td class="py-2 text-slate-600 dark:text-slate-300">Empty string when unset. If non-empty, make the entire banner clickable.</td></tr>
+          <tr><td class="py-2 pr-4 font-mono text-xs">is_global</td><td class="py-2 pr-4 font-mono text-xs">bool</td><td class="py-2 text-slate-600 dark:text-slate-300">True if the alert was published for all apps.</td></tr>
+          <tr><td class="py-2 pr-4 font-mono text-xs">is_dismissable</td><td class="py-2 pr-4 font-mono text-xs">bool</td><td class="py-2 text-slate-600 dark:text-slate-300">When false, render the banner without a close button.</td></tr>
+          <tr><td class="py-2 pr-4 font-mono text-xs">start_at, end_at</td><td class="py-2 pr-4 font-mono text-xs">datetime | null</td><td class="py-2 text-slate-600 dark:text-slate-300">Active window. The server already filters by these; included for client display.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mt-10 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+    <h2 class="text-base font-semibold">Notes for frontend authors</h2>
+    <ul class="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-700 dark:text-slate-300">
+      <li>Style the banner by <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">alert_type</code>: <span class="rounded bg-sky-100 px-1.5 py-0.5 text-sky-800 dark:bg-sky-900 dark:text-sky-200">info</span>, <span class="rounded bg-amber-100 px-1.5 py-0.5 text-amber-800 dark:bg-amber-900 dark:text-amber-200">warning</span>, <span class="rounded bg-red-100 px-1.5 py-0.5 text-red-800 dark:bg-red-900 dark:text-red-200">critical</span>.</li>
+      <li>If <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">link</code> is set, make the entire banner clickable and navigate there on click. Use <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">target="_blank" rel="noopener"</code> for external URLs.</li>
+      <li>Allow users to dismiss alerts client-side using the <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">id</code>; only show a close button when <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">is_dismissable</code> is true. The server doesn't track per-user state.</li>
+      <li>The <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">content</code> field is sanitised server-side (nh3 / Ammonia), but defence-in-depth: run it through <a href="https://github.com/cure53/DOMPurify" class="font-medium text-brand-600 hover:underline">DOMPurify</a> or smth else on the client before injecting it into the DOM.
+      <li>Calls with an unknown <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">?app=</code> code respond <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">400 Bad Request</code>; check the spelling of your app's slug.</li>
+    </ul>
+  </section>
+
+  <section class="mt-10 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+    <h2 class="text-base font-semibold">AI prompt</h2>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+      Paste this into your AI to scaffold the integration in any frontend project. It's framework-agnostic — clarify the stack you're using and the AI will adapt.
+    </p>
+    <div class="code-block mt-4 relative">
+<pre class="overflow-x-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>You're integrating Solvro Alerts into this app. The goal is a single drop-in
+&lt;Alerts /&gt; component (or the platform-equivalent: a Flutter widget, a SwiftUI
+view, a Jetpack Compose @Composable, etc.) that I can mount once near the root
+and forget about. It owns fetching, caching, sanitising, rendering, dismissal,
+and link handling.
+
+Detect the platform from the project I'm in (web, Flutter, React Native,
+native iOS/Android, …) and adapt accordingly. Where this prompt mentions a web
+API, use the closest equivalent on the target platform — examples are listed
+inline below.
+
+ENDPOINT
+  GET https://alerts.solvro.pl/api/v1/alerts/?app=&lt;APP_CODE&gt;
+  - public, no auth, no API key
+  - cache for ~60s on the client
+  - 400 if the `app` code is unknown — surface as a developer error, never to end-users
+  - replace &lt;APP_CODE&gt; with the slug registered for this app (ask me if unset)
+
+RESPONSE (array; render in order)
+  type Alert = {
+    id: string;                  // uuid; key dismissal state by this
+    title: string;               // may be empty
+    content: string;             // HTML — sanitise + render via the platform's HTML renderer
+    alert_type: "info" | "warning" | "critical";
+    link: string;                // empty string when unset
+    is_global: boolean;
+    is_dismissable: boolean;
+    start_at: string | null;     // ISO-8601; server already filters by window
+    end_at: string | null;
+  };
+
+UI RULES
+  - Stack banners vertically near the top of the screen. Place above or below the
+    navbar/header — pick whichever matches the existing layout.
+  - Color + icon by alert_type:
+      info     -> blue / info icon
+      warning  -> amber / warning icon
+      critical -> red / alert icon
+  - Render `content` as HTML, but DEFENCE-IN-DEPTH: pass it through a sanitiser before
+    handing it to the platform's HTML renderer. The server already strips scripts/img/etc.
+    with nh3, but a second client-side pass protects against future regressions and
+    CDN/cache tampering. Allow only these inline tags:
+      a, b, em, i, strong, u, p, br, ul, ol, li, h2, h3, h4
+    and attributes: href, title, target, rel.
+    Sanitiser per platform:
+      web              -> DOMPurify
+      Node SSR         -> sanitize-html (or DOMPurify with jsdom)
+      React Native     -> sanitize-html (no DOM available); render with react-native-render-html
+      Flutter          -> flutter_html (parses + drops disallowed tags) or html package
+      iOS native       -> NSAttributedString from a sanitised string (drop &lt;script&gt;, etc.)
+      Android native   -> Html.fromHtml on a pre-stripped string (Jsoup safelist)
+    Never `eval`, never inject inline scripts.
+  - If `link` is non-empty, make the whole banner tappable/clickable and open it. Use:
+      web              -> &lt;a href&gt; or router navigation; target="_blank" for external
+      React Native     -> Linking.openURL
+      Flutter          -> url_launcher
+      iOS / Android    -> the system URL opener (UIApplication.open / Intent.ACTION_VIEW)
+  - If `is_dismissable` is true, show a close affordance. On tap, persist the alert `id`
+    and hide it. On mount, read the persisted set and filter the response before rendering.
+    Storage per platform:
+      web              -> localStorage, key "solvro-alerts-dismissed", JSON array of ids
+      React Native     -> AsyncStorage / MMKV, same key + format
+      Flutter          -> shared_preferences (StringList)
+      iOS / Android    -> UserDefaults / SharedPreferences
+  - If `is_dismissable` is false, omit the close affordance entirely.
+  - If the array is empty, render nothing — no empty state, no skeleton on subsequent fetches.
+
+DELIVERABLE
+  A single self-contained component (`<Alerts />` or the platform equivalent). Internally
+  it must:
+    1. fetch the endpoint with the platform's HTTP client + a 60s cache (TanStack Query /
+       SWR / framework equivalent; on platforms without one, a simple useState + revalidate
+       on mount is fine);
+    2. read/write the dismissal set with the platform's persistent storage;
+    3. sanitise `content` with the platform sanitiser;
+    4. render the banner stack, applying color/icon by alert_type and the click/dismiss
+       behavior above.
+  Mount it once near the root layout. Expose only one prop if any (override APP_CODE) —
+  consumers should not have to wire a fetcher, a query client, or a sanitiser themselves.
+  Read APP_CODE from the project's env config (.env / app config / Info.plist /
+  AndroidManifest meta-data, whichever is idiomatic) and document it in the README.
+  Do NOT add a new state library or UI library — use what the project already has.
+
+ACCEPTANCE
+  - Mounting `<Alerts />` once is enough; no extra wiring required at call sites.
+  - When the API returns alerts, banners render in order with correct color/icon.
+  - Tapping a banner with a `link` navigates correctly; without a `link`, it does nothing.
+  - Dismissed alerts stay hidden across app launches but reappear when the admin
+    publishes a new alert with a different id.
+  - Expired / inactive alerts never appear (server already filters; do not re-filter
+    by start_at/end_at on the client beyond dismissal).
+  - No XSS / script-injection regressions: `content` passes through the platform
+    sanitiser with the inline-only allow-list. A `&lt;script&gt;` smuggled into a fixture
+    must be stripped both by the server (already enforced) and on the client.</code></pre>
+      <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
+    </div>
+  </section>
+
+  <footer class="mt-16 text-center text-xs text-slate-500 dark:text-slate-400">
+    Made with ❤️ by <a href="https://solvro.pl" class="hover:underline">Solvro</a> © 2026
+  </footer>
+</main>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .copy-btn {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    padding: 0.25rem 0.5rem; font-size: 0.7rem; font-weight: 600;
+    color: rgb(226 232 240); background: rgb(51 65 85);
+    border-radius: 0.25rem; cursor: pointer; opacity: 0; transition: opacity 0.15s;
+  }
+  .code-block:hover .copy-btn { opacity: 1; }
+  .copy-btn:hover { background: rgb(71 85 105); }
+  .copy-btn.copied { background: rgb(5 150 105); color: white; }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.querySelectorAll('.copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      const code = btn.parentElement.querySelector('code')?.innerText ?? '';
+      try {
+        await navigator.clipboard.writeText(code);
+        const prev = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = prev;
+          btn.classList.remove('copied');
+        }, 1200);
+      } catch (e) { /* no-op */ }
+    });
+  });
+</script>
+{% endblock %}

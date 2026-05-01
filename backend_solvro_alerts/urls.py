@@ -16,11 +16,13 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
+from django.views.generic import TemplateView
 from drf_spectacular.utils import extend_schema
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView
 
-from backend_solvro_alerts.views import solvro_login, solvro_callback
+from backend_solvro_alerts.views import index
+from users.views import register, solvro_callback, solvro_login
 
 
 @extend_schema(exclude=True)
@@ -29,13 +31,16 @@ class HiddenSpectacularAPIView(SpectacularAPIView):
 
 
 urlpatterns = [
+    path("", index, name="index"),
+    path("admin/register/", register, name="admin_register"),
+    path("admin/auth/solvro/login/", solvro_login, name="solvro_login"),
+    path("admin/auth/solvro/callback/", solvro_callback, name="solvro_callback"),
     path("admin/", admin.site.urls),
-    # API endpoints for alerts app
     path("api/v1/", include("alerts.urls")),
     path("schema/", HiddenSpectacularAPIView.as_view(), name="schema"),
     path(
-        "swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"
+        "scalar/",
+        TemplateView.as_view(template_name="scalar.html"),
+        name="scalar-ui",
     ),
-    path("auth/login/", solvro_login, name="solvro_login"),
-    path("auth/callback/", solvro_callback, name="solvro_callback"),
 ]

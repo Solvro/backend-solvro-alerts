@@ -1,30 +1,19 @@
-### Instrukcja użycia API
+# Solvro Alerts
 
-1. **Przykladowy request**
+Centralny mikroserwis komunikatów / banerów dla aplikacji Solvro.
+Frontendy (Testownik, Planer, Eventownik, …) odpytują jeden publiczny
+endpoint i wyświetlają aktywne alerty użytkownikom.
 
-```bash
-curl -X GET "http://localhost:8000/api/v1/alerts?app=testownik" \
-     -H "X-API-KEY: YOUR_APPLICATION_API_KEY" \
-     -H "Content-Type: application/json"
-```
+Hostowane: <https://alerts.solvro.pl> — przewodnik integracji,
+dokumentacja API (`/scalar/`) i panel admina (`/admin/`).
 
-2. **Przykladowy resposne**
-```json
-[
-  {
-    "title": "System Maintenance",
-    "content": "Planned downtime at 10 PM.",
-    "alert_type": "info",
-    "is_global": true
-  },
-  {
-    "title": "App Specific Alert",
-    "content": "Only for testownik app.",
-    "alert_type": "warning",
-    "is_global": false
-  }
-]
-```
+### Stack
+
+- Django 6 · Django REST Framework · drf-spectacular (+ Scalar UI)
+- django-unfold (themed admin) · custom email-based User model
+- nh3 dla sanitizacji HTML alertów
+- Solvro Auth (Keycloak / OIDC) jako alternatywne logowanie
+- PostgreSQL na produkcji (`psycopg[binary]`), SQLite domyślnie w dev
 
 ### Instalacja
 
@@ -73,3 +62,8 @@ curl -X GET "http://localhost:8000/api/v1/alerts?app=testownik" \
    ```bash
    python manage.py runserver
    ```
+### Contributors
+
+- [Wiktor Gruszczyński](https://github.com/WiktorGruszczynski)
+- [Harukume](https://github.com/Harukume)
+- [Antoni Czaplicki](https://github.com/Antoni-Czaplicki)

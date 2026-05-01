@@ -13,81 +13,84 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import logging
 import os
 from pathlib import Path
+
 import dotenv
-
-
-logger = logging.getLogger(__name__)
+from django.templatetags.static import static
+from django.urls import reverse_lazy
 
 dotenv.load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+logger = logging.getLogger(__name__)
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+def _env_bool(key, default=False):
+    return os.getenv(key, str(default)).lower() in ("1", "true", "yes", "on")
 
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = os.getenv(
     "SECRET_KEY", "django-insecure-x%2xk_*7(-dq@xoib6owuggm&l)&+z6baocd(jc#o)xewty+*e"
 )
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False") == "True"
-
+DEBUG = _env_bool("DEBUG", False)
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:8000").split(
-    ","
-)
-
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://\w+\.solvro\.pl$",
-    r"^http://localhost(:\d+)?$",
-]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_URLS_REGEX = r"^/api/.*$"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_PERMISSION_CLASSES": [],
 }
 
-# Application definition
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Solvro Alerts API",
+    "DESCRIPTION": "Public read-only API for Solvro alerts.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
 
 INSTALLED_APPS = [
+    "unfold",
+    "unfold.contrib.forms",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "rest_framework",
     "drf_spectacular",
+    "users",
     "applications",
     "alerts",
-    "oauth2_provider",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "oauth2_provider.middleware.OAuth2TokenMiddleware",
 ]
 
 AUTHENTICATION_BACKENDS = [
-    "oauth2_provider.backends.OAuth2Backend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
+AUTH_USER_MODEL = "users.User"
 
 ROOT_URLCONF = "backend_solvro_alerts.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -101,70 +104,145 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend_solvro_alerts.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("DB_NAME", BASE_DIR / "db.sqlite3"),
-        "USER": os.environ.get("DB_USER", "user"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "password"),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.getenv("DB_NAME", BASE_DIR / "db.sqlite3"),
+        "USER": os.getenv("DB_USER", ""),
+        "PASSWORD": os.getenv("DB_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", ""),
+        "PORT": os.getenv("DB_PORT", ""),
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "Europe/Warsaw"
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-OAUTH2_PROVIDER = {
-    "SCOPES": {
-        "read": "Read scope",
-        "write": "Write scope",
-    },
-    "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,
-    "REFRESH_TOKEN_EXPIRE_SECONDS": 3600 * 24 * 7,
-}
-# Solvro Auth settings
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_URL = reverse_lazy("admin:login")
+LOGIN_REDIRECT_URL = "/admin/"
+LOGOUT_REDIRECT_URL = "/"
+
 SOLVRO_AUTH = {
     "KEYCLOAK_URL": os.getenv("SOLVRO_KEYCLOAK_URL", "https://auth.solvro.pl"),
     "REALM": os.getenv("SOLVRO_REALM", "solvro"),
-    "CLIENT_ID": os.getenv("SOLVRO_AUTH_CLIENT_ID"),
-    "CLIENT_SECRET": os.getenv("SOLVRO_AUTH_CLIENT_SECRET"),
+    "CLIENT_ID": os.getenv("SOLVRO_AUTH_CLIENT_ID", ""),
+    "CLIENT_SECRET": os.getenv("SOLVRO_AUTH_CLIENT_SECRET", ""),
+}
+
+UNFOLD = {
+    "SITE_TITLE": "Solvro Alerts",
+    "SITE_HEADER": "Solvro Alerts",
+    "SITE_SUBHEADER": "Admin",
+    "SITE_URL": "/",
+    "SITE_ICON": lambda r: static("img/logo_solvro_mono.svg"),
+    "SITE_LOGO": {
+        "light": lambda r: static("img/solvro-wordmark-light.png"),
+        "dark": lambda r: static("img/solvro-wordmark-dark.png"),
+    },
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "type": "image/svg+xml",
+            "href": lambda r: static("img/logo_solvro_mono.svg"),
+        },
+    ],
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "THEME": None,
+    "BORDER_RADIUS": "8px",
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": "Navigation",
+                "items": [
+                    {
+                        "title": "Dashboard",
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": "Alerts",
+                "items": [
+                    {
+                        "title": "Alerts",
+                        "icon": "campaign",
+                        "link": reverse_lazy("admin:alerts_alert_changelist"),
+                    },
+                    {
+                        "title": "Applications",
+                        "icon": "apps",
+                        "link": reverse_lazy(
+                            "admin:applications_application_changelist"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": "Access",
+                "items": [
+                    {
+                        "title": "Users",
+                        "icon": "person",
+                        "link": reverse_lazy("admin:users_user_changelist"),
+                        "permission": lambda r: r.user.is_superuser,
+                    },
+                    {
+                        "title": "Groups",
+                        "icon": "groups",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                        "permission": lambda r: r.user.is_superuser,
+                    },
+                ],
+            },
+        ],
+    },
+    "COLORS": {
+        "base": {
+            "50": "248 250 252",
+            "100": "241 245 249",
+            "200": "226 232 240",
+            "300": "203 213 225",
+            "400": "148 163 184",
+            "500": "100 116 139",
+            "600": "71 85 105",
+            "700": "51 65 85",
+            "800": "30 41 59",
+            "900": "15 23 42",
+            "950": "8 12 28",
+        },
+        "primary": {
+            "50": "239 246 255",
+            "100": "219 234 254",
+            "200": "191 219 254",
+            "300": "147 197 253",
+            "400": "96 165 250",
+            "500": "64 140 255",
+            "600": "37 99 235",
+            "700": "29 78 216",
+            "800": "21 41 89",
+            "900": "17 33 71",
+            "950": "10 20 45",
+        },
+    },
 }

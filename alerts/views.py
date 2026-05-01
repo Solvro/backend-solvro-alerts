@@ -1,44 +1,52 @@
-from rest_framework import viewsets
 from django.db.models import Q
+from django.utils import timezone
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError
+
+from applications.models import Application
+
 from .models import Alert
 from .serializers import AlertSerializer
-from backend_solvro_alerts.permissions import IsAPIKeyAuthenticated
-from django.utils import timezone
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name="app",
+            type=str,
+            location=OpenApiParameter.QUERY,
+            required=False,
+            description=(
+                "Application code (e.g. 'testownik', 'topwr'). When provided, "
+                "returns global alerts plus alerts targeted at that "
+                "application. When omitted, only global alerts are returned."
+            ),
+        )
+    ]
+)
 class AlertViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for viewing active alerts.
-
-    Returns a list of alerts filtered by application name or global status.
-    Requires a valid X-API-KEY header for authentication.
-    """
+    """Public, read-only endpoint exposing currently active alerts."""
 
     serializer_class = AlertSerializer
-    permission_classes = [IsAPIKeyAuthenticated]
+    permission_classes = []
+    authentication_classes = []
 
     def get_queryset(self):
-        """
-        Filter the available alerts based on the 'app' query parameter.
-        Only returns alerts that are active and within the valid time range.
-        """
         now = timezone.now()
+        qs = (
+            Alert.objects.filter(is_active=True)
+            .filter(Q(start_at__lte=now) | Q(start_at__isnull=True))
+            .filter(Q(end_at__gt=now) | Q(end_at__isnull=True))
+        )
 
-        queryset = Alert.objects.filter(is_active=True)
-
-        queryset = queryset.filter(Q(start_at__lte=now) | Q(start_at__isnull=True))
-
-        queryset = queryset.filter(Q(end_at__gte=now) | Q(end_at__isnull=True))
-
-        # Retrieve the application name from query parameters (e.g., ?app=testownik)
-        app_name = self.request.query_params.get("app")
-
-        if app_name:
-            # Filter: show alerts that are either global OR specifically assigned to this app
-            queryset = queryset.filter(
-                Q(is_global=True) | Q(applications__name=app_name)
+        app_code = self.request.query_params.get("app")
+        if app_code:
+            if not Application.objects.filter(code=app_code).exists():
+                raise ValidationError(
+                    {"app": [f"Unknown application code: {app_code!r}."]}
+                )
+            return qs.filter(
+                Q(is_global=True) | Q(applications__code=app_code)
             ).distinct()
-        else:
-            queryset = queryset.filter(is_global=True)
-
-        return queryset
+        return qs.filter(is_global=True)
