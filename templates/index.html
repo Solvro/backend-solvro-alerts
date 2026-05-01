@@ -73,17 +73,38 @@
     </p>
 
     <div class="mt-4 grid gap-4 lg:grid-cols-2">
-      <div>
-        <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">curl</h3>
-        <div class="code-block mt-1 relative">
-<pre class="overflow-x-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>curl https://alerts.solvro.pl/api/v1/alerts/?app=testownik</code></pre>
-          <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
+      <div class="min-w-0 flex flex-col gap-4">
+        <div class="min-w-0">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">curl</h3>
+          <div class="code-block mt-1 relative min-w-0">
+<pre class="overflow-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>curl https://alerts.solvro.pl/api/v1/alerts/?app=testownik</code></pre>
+            <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
+          </div>
+        </div>
+        <div class="min-w-0">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Example response</h3>
+          <div class="code-block mt-1 relative min-w-0">
+<pre class="overflow-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>[
+  {
+    "id": "0a1c2e8e-9f30-4a4f-b4a3-7b1f3a1a2b9c",
+    "title": "Maintenance tonight",
+    "content": "&lt;p&gt;We're upgrading our server at 22:00.&lt;/p&gt;",
+    "alert_type": "info",
+    "link": "https://status.solvro.pl",
+    "is_global": true,
+    "is_dismissable": true,
+    "start_at": null,
+    "end_at": "2026-05-01T22:00:00Z"
+  }
+]</code></pre>
+            <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
+          </div>
         </div>
       </div>
-      <div>
+      <div class="min-w-0">
         <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">React + TanStack Query</h3>
-        <div class="code-block mt-1 relative">
-<pre class="overflow-x-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>import { useQuery } from "@tanstack/react-query";
+        <div class="code-block mt-1 relative min-w-0">
+<pre class="overflow-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>import { useQuery } from "@tanstack/react-query";
 import type { Alert } from "./alerts";
 
 const APP_CODE = "testownik";
@@ -104,26 +125,6 @@ export function useAlerts() {
 }</code></pre>
           <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
         </div>
-      </div>
-    </div>
-
-    <div class="mt-4">
-      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Example response</h3>
-      <div class="code-block mt-1 relative">
-<pre class="overflow-x-auto rounded-md bg-slate-900 p-4 pr-12 text-xs leading-relaxed text-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"><code>[
-  {
-    "id": "0a1c2e8e-9f30-4a4f-b4a3-7b1f3a1a2b9c",
-    "title": "Maintenance tonight",
-    "content": "&lt;p&gt;We're upgrading our server at 22:00.&lt;/p&gt;",
-    "alert_type": "info",
-    "link": "https://status.solvro.pl",
-    "is_global": true,
-    "is_dismissable": true,
-    "start_at": null,
-    "end_at": "2026-05-01T22:00:00Z"
-  }
-]</code></pre>
-        <button type="button" class="copy-btn" aria-label="Copy">Copy</button>
       </div>
     </div>
   </section>

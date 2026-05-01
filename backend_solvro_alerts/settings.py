@@ -33,7 +33,12 @@ SECRET_KEY = os.getenv(
     "SECRET_KEY", "django-insecure-x%2xk_*7(-dq@xoib6owuggm&l)&+z6baocd(jc#o)xewty+*e"
 )
 DEBUG = _env_bool("DEBUG", False)
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = [
+    h for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h
+]
+CSRF_TRUSTED_ORIGINS = [
+    o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o
+]
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_URLS_REGEX = r"^/api/.*$"
@@ -70,6 +75,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
